@@ -145,7 +145,8 @@ public:
     
     Creature() {}
     Creature(int x, int y, int sp):x(x), y(y), speed(sp),hunger(5),distant(15) {}
-    void ScanAndDrow(std::vector<std::string>& fl, std::vector<Carrot>& fd) {
+    template <typename T>
+    void ScanAndDrow(std::vector<std::string>& fl, std::vector<T>& fd) {
         srand(time(NULL));
         int min = 1000;
         
@@ -168,22 +169,42 @@ public:
     
         
 };
+class Foxes : public Creature {
+    Foxes(int x, int y, int sp) :Creature(x, y, sp) {}
+};
 class Rabbit :public Creature {
+    int hunger_max = 150;
+    
+    int mingap = 30;
 
 public:
+    int gap;
     //Rabbit():Creature() {}
-    Rabbit(int x, int y, int sp):Creature(x, y, sp) {
-        
+    Rabbit(int x, int y, int sp):Creature(x, y, sp), gap(10){}
+    void eat() {
+        if (hunger + 25 < hunger_max) {
+            hunger += 25;
+        }
+        else {
+            hunger = hunger_max;
+        }
     }
-    void eat() {}
-
+    bool readyforsex() {
+        return((gap > mingap) && (hunger > 0.8 * hunger_max));
+    }
+    friend void sex(Rabbit C1, Rabbit C2, std::vector<Rabbit>& rabbits);
 };
 
-
+void sex(Rabbit C1, Rabbit C2, std::vector<Rabbit>& rab) {
+    C1.hunger -= 40;
+    C2.hunger -= 40;
+    C1.gap = 0;
+    C2.gap = 0;
+    rab.push_back(Rabbit(C1.x, C2.y,6));//speed change future
+}
 int main()
 {   
     srand(time(NULL));
-    
     
     std::vector<Carrot> foods;
     for (int i = 0; i < 3; i++) {
@@ -193,25 +214,41 @@ int main()
     for (int i = 0; i < 3; i++) {
         rabbits.push_back(Rabbit(10 * i, 20, i+1));
     }
+    std::vector<Rabbit> readyrabbits;
+    
     std::vector <std::string> field;
     for (int i = 0; i < 25; i++) {
         field.push_back("----------------------------------------------------------------------------------------------------");
     }
     for (int l = 0; l < 150; l++) {
         for (int i = 0; i < 3; i++) {
+
             foods[i].DrawCarrot(field);
         }
         for (int j = 0; j < rabbits.size(); j++) {
             for (int i = 0; i < foods.size(); i++) {
                 if (rabbits[j].colision(foods[i].x, foods[i].y)) {
-                    //rabbits[j].eat() на будущее
+                    rabbits[j].eat();
                     foods[i].NewCords();
                 }
             }
         }
-        for (int p = 0; p < rabbits.size(); p++) {
-            rabbits[p].ScanAndDrow(field, foods);
+        readyrabbits.clear();
+        for (int i = 0; i < 3; i++) {
+            if (rabbits[i].readyforsex()) {
+                readyrabbits.push_back(rabbits[i]);
+            }
         }
+        for (int p = 0; p < rabbits.size(); p++) {
+            if (!rabbits[p].readyforsex()) {
+                rabbits[p].ScanAndDrow<Carrot>(field, foods);
+            } 
+            else{
+                rabbits[p].ScanAndDrow<Rabbit>(field, readyrabbits);
+            }
+            rabbits[p].gap++;//function
+        }
+
         for (int i = 0; i < 25; i++) {
             std::cout << field[i] << '\n';
         }
