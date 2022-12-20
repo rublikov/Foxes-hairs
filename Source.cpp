@@ -153,7 +153,7 @@ public:
         for (int i = 0; i < fd.size(); i++) {
             if (((abs(x - fd[i].x) + abs(y - fd[i].y) < 1000)) && (min > (abs(x - fd[i].x)) + abs(y - fd[i].y))) {
                 n = i;
-                min = abs(x - fd[0].x) + abs(y - fd[i].y);
+                min = abs(x - fd[i].x) + abs(y - fd[i].y);
             }
         }
         if (n == -1) {
@@ -204,7 +204,7 @@ void sex(Rabbit C1, Rabbit C2, std::vector<Rabbit>& rab) {
     C2.hunger -= 40;
     C1.gap = 0;
     C2.gap = 0;
-    rab.push_back(Rabbit(C1.x, C2.y, 5, 1));//speed change future
+    rab.push_back(Rabbit(C1.x, C2.y, 5, 1));           //speed change future
 }
 int dist(Rabbit C1, Rabbit C2)
 {
@@ -224,7 +224,8 @@ int main()
     for (int i = 0; i < 3; i++) {
         rabbits.push_back(Rabbit(10 * i, 20, i + 1, 1));
     }
-    std::vector<Rabbit> readyrabbits;
+    std::vector<Rabbit*> readyrabbits;                           // 
+    
 
     std::vector <std::string> field;
     for (int i = 0; i < 25; i++) {
@@ -243,9 +244,12 @@ int main()
             }
         }
         readyrabbits.clear();
+      
         for (int i = 0; i < 3; i++) {
+            Rabbit* p = NULL;
             if (rabbits[i].readyforsex()) {
-                readyrabbits.push_back(rabbits[i]);
+                p = &rabbits[i];
+                readyrabbits.push_back(p);
             }
         }
         for (int p = 0; p < rabbits.size(); p++) {
@@ -265,16 +269,16 @@ int main()
                     int min = 555;
                     int k = -1;
                     for (int j = i + 1; j < readyrabbits.size(); j++) {
-                        if (dist(readyrabbits[i], readyrabbits[j]) < min)
+                        if (dist(*readyrabbits[i], *readyrabbits[j]) < min)
                         {
-                            min = dist(readyrabbits[i], readyrabbits[j]);
+                            min = dist(*readyrabbits[i], *readyrabbits[j]);
                             k = j;
                         }
                     }
-                    if (min < 555) {
-                        readyrabbits[i].DrawCreature(field, readyrabbits[k].getscordsx(), readyrabbits[k].getcordsy());
-                        if (dist(readyrabbits[i], readyrabbits[k]) < 3) {
-                            sex(readyrabbits[i], readyrabbits[k], rabbits);
+                    if ((min < 555)&&(k!=-1))  {
+                        readyrabbits[i]->DrawCreature(field, 5, 5);       // experiment
+                        if (dist(*readyrabbits[i], *readyrabbits[k]) < 3) {
+                            sex(*readyrabbits[i], *readyrabbits[k], rabbits);
                         }
                     }
                 }
@@ -285,7 +289,7 @@ int main()
         for (int i = 0; i < 25; i++) {
             std::cout << field[i] << '\n';
         }
-        Sleep(50);
+        Sleep(150);
         if (l != 99) {
             system("cls");
         }
