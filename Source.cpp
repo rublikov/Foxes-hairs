@@ -178,7 +178,7 @@ class Rabbit :public Creature {
 public:
     int gap;
     //Rabbit():Creature() {}
-    Rabbit(int x, int y, int sp) :Creature(x, y, sp), gap(10) {}
+    Rabbit(int x, int y, int sp, int gap) :Creature(x, y, sp), gap(10) {}
     void eat() {
         if (hunger + 60 < hunger_max) {
             hunger += 60;
@@ -204,7 +204,7 @@ void sex(Rabbit C1, Rabbit C2, std::vector<Rabbit>& rab) {
     C2.hunger -= 40;
     C1.gap = 0;
     C2.gap = 0;
-    rab.push_back(Rabbit(C1.x, C2.y, 5));//speed change future
+    rab.push_back(Rabbit(C1.x, C2.y, 5, 1));//speed change future
 }
 int dist(Rabbit C1, Rabbit C2)
 {
@@ -222,9 +222,9 @@ int main()
     }
     std::vector<Rabbit> rabbits;
     for (int i = 0; i < 3; i++) {
-        rabbits.push_back(Rabbit(10 * i, 20 + 20 * i, i + 1));
+        rabbits.push_back(Rabbit(10 * i, 20, i + 1, 1));
     }
-   // std::vector<Rabbit> readyrabbits;
+    std::vector<Rabbit> readyrabbits;
 
     std::vector <std::string> field;
     for (int i = 0; i < 25; i++) {
@@ -249,6 +249,7 @@ int main()
             }
         }
         for (int p = 0; p < rabbits.size(); p++) {
+            rabbits[p].tick();
             if (!rabbits[p].readyforsex()) {
                 rabbits[p].ScanAndDrow(field, foods);
             }
@@ -260,34 +261,34 @@ int main()
         */
 
             else {
-
                 for (int i = 0; i < readyrabbits.size() - 1; i++) {
                     int min = 555;
+                    int k = -1;
                     for (int j = i + 1; j < readyrabbits.size(); j++) {
                         if (dist(readyrabbits[i], readyrabbits[j]) < min)
                         {
                             min = dist(readyrabbits[i], readyrabbits[j]);
+                            k = j;
                         }
-
-                        if (min < 555) {
-                            readyrabbits[i].DrawCreature(field, readyrabbits[j].getscordsx(), readyrabbits[j].getcordsy());
-                            if (dist(readyrabbits[i], readyrabbits[j]) < 3) {
-                                sex(readyrabbits[i], readyrabbits[j], rabbits);
-                            }
+                    }
+                    if (min < 555) {
+                        readyrabbits[i].DrawCreature(field, readyrabbits[k].getscordsx(), readyrabbits[k].getcordsy());
+                        if (dist(readyrabbits[i], readyrabbits[k]) < 3) {
+                            sex(readyrabbits[i], readyrabbits[k], rabbits);
                         }
                     }
                 }
             }
-
-
-            for (int i = 0; i < 25; i++) {
-                std::cout << field[i] << '\n';
-            }
-            Sleep(5000);
-            if (l != 99) {
-                system("cls");
-            }
-
         }
+
+
+        for (int i = 0; i < 25; i++) {
+            std::cout << field[i] << '\n';
+        }
+        Sleep(50);
+        if (l != 99) {
+            system("cls");
+        }
+
     }
 }
